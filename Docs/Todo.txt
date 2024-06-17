@@ -1,0 +1,2 @@
+Corrigir Erro do Parser HTTP
+Enviar Mensagem Quando tracker nao é http
