@@ -1,0 +1,22 @@
+{
+b'announce': b'udp://tracker.yify-torrents.com/announce', 
+b'announce-list': 
+  [[b'udp://tracker.yify-torrents.com/announce'], 
+  [b'udp://open.demonii.com:1337'], 
+  [b'udp://exodus.desync.com:6969'], 
+  [b'udp://tracker.istole.it:80'], 
+  [b'udp://tracker.publicbt.com:80'], 
+  [b'udp://tracker.openbittorrent.com:80'], 
+  [b'udp://tracker.leechers-paradise.org:6969'], 
+  [b'udp://9.rarbg.com:2710'], 
+  [b'udp://tracker.coppersurfer.tk:6969']], 
+b'comment': b'Made using YIFY Bot', 
+b'created by': b'mktorrent 1.0', 
+b'creation date': 1426426333, 
+b'info': 
+  {b'files': 
+    [{b'length': 2431697820, b'path': [b'Interstellar.2014.2014.1080p.BluRay.x264.YIFY.mp4']}, 
+    {b'length': 208047, b'path': [b'WWW.YTS.RE.jpg']}], 
+  b'name': b'Interstellar (2014) (2014) [1080p]', 
+  b'piece length': 2097152,
+  b'pieces': b'\rq\xc26q\xcf\xcb\xea\x1c\xdfZl\xeb\x96\x0f\xe8\x9e\xf5\xb0\xbd\x80\xbd\x11"\x07/kU_:\x1d_\r\xe6\x18[\xaa\xc7\x8e\xfa\xd3\x04\xe4\r;\x0e\xfa\xa1g\x05\x16G\x13\xd3\x1d\xe4\x94\x17
