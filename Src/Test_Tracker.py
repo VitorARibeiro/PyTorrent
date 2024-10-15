@@ -1,4 +1,5 @@
-import Tracker as Tracker
+import Torrent as TorrentClass
+import Tracker as TrackerClass 
 import tkinter as tk
 from tkinter import filedialog
 
@@ -9,16 +10,11 @@ def main():
 
     filePath = filedialog.askopenfilename()
 
-    response = Tracker.SendRequest(filePath) 
-
-    if response == None:
-        return 
+   #Primeiro Criar o Torrent , class que faz parse
+    Torrent = TorrentClass.Torrent(filePath)
+    # Em seguida mandar o Torrent para o tracker e mandar conectar
+    Tracker = TrackerClass.Tracker(Torrent)
     
-    if(response.status_code == 200):
-        print(response.text)
-    else:
-        print("Erro na resposta do tracker")
-        print(response.status_code)
-
+    print(Tracker.Connect(True, 0, 0))
 
 main()

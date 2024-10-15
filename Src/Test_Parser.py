@@ -1,4 +1,4 @@
-from TorrentParser import * 
+import Torrent as TorrentClass
 import tkinter as tk
 from tkinter import filedialog
 
@@ -10,10 +10,8 @@ def main():
     root.withdraw()
 
     filePath = filedialog.askopenfilename()
-    Torrent = GetDecodedTorrent(filePath)
-    info = GetBencodedInfo(Torrent)
-    SumFile = GetSumFileLengths(Torrent)
-    print(SumFile)
+    TorrentInstance = TorrentClass.Torrent(filePath)
+    print(TorrentInstance)
 
 
 main()
