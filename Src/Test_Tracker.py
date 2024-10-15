@@ -1,10 +1,15 @@
-import Src.Tracker as Tracker
+import Tracker as Tracker
+import tkinter as tk
+from tkinter import filedialog
 
 
 def main():
-    path = '/home/vitor-ribeiro/Downloads/ubuntu-22.04.4-desktop-amd64.iso.torrent'
-    Resposnse = Tracker.SendRequest(path)
-    print(Resposnse)
+    root = tk.Tk()
+    root.withdraw()
+
+    filePath = filedialog.askopenfilename()
+    
+    print(Tracker.SendRequest(filePath))
 
 
 main()
