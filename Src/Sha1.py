@@ -10,6 +10,6 @@ def hash_sha1(data):
 
     sha1_hash = hashlib.sha1()
     sha1_hash.update(data)
-    hashed_value = sha1_hash.hexdigest()
+    hashed_value = sha1_hash.digest()
 
     return hashed_value

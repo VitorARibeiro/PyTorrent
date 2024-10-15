@@ -10,9 +10,9 @@ def main():
     root.withdraw()
 
     filePath = filedialog.askopenfilename()
-    Torrent = DecodedTorrent(filePath)
-    Info = BencodedInfo(Torrent)
-    SumFile = SumFileLengths(Torrent)
+    Torrent = GetDecodedTorrent(filePath)
+    info = GetBencodedInfo(Torrent)
+    SumFile = GetSumFileLengths(Torrent)
     print(SumFile)
 
 
