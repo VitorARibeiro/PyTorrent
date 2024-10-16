@@ -1,19 +1,18 @@
 import bencodepy
-import aiohttp
+import httpx
 import random
 import logging
 from urllib.parse import urlencode
-# import requests
 
-# DecodedTorrent should be the original
-# torrent file Decoded by bencodepy, a dictionary
-
+class TrackerResponse:
+    def __init__(self, response:dict):
+        self.response = response
 class Tracker:
 
     def __init__(self, Torrent):
         self.Torrent = Torrent
         self.PeerId = CalculatePeerId()
-        self.httpClient = aiohttp.ClientSession()
+        self.httpClient = httpx.AsyncClient()
 
     async def Connect(self,
                 first:bool = None,
@@ -39,33 +38,35 @@ class Tracker:
         if first:
             Params['event'] = 'started'
 
-        url = self.torrent.announce + '?' + urlencode(Params)
-        logging.info('Connecting to tracker at: ' + url)
+        url = self.Torrent.AnnounceUrl + '?' + urlencode(Params)
+        # logging.info('Connecting to tracker at: ' + url)
+        print('Connecting to tracker at: ' + url)
 
-        async with self.http_client.get(url) as response:
-            if not response.status == 200:
-                raise ConnectionError('Unable to connect to tracker: status code {}'.format(response.status))
-            data = await response.read()
-            self.raise_for_error(data)
-            return bencodepy.decode(data)
+        response = await self.httpClient.get(url)
+        if not response.status_code == 200:
+            raise ConnectionError('Unable to connect to tracker: status code {}'.format(response.status))
 
-        def close(self):
-            self.httpClient.close()
+        data = response.content
+        self.raise_for_error(data)
+        return bencodepy.decode(data)
 
-        def raise_for_error(self, tracker_response):
-            """
-            A (hacky) fix to detect errors by tracker even when the response has a status code of 200  
-            """
-            try:
-                # a tracker response containing an error will have a utf-8 message only.
-                # see: https://wiki.theory.org/index.php/BitTorrentSpecification#Tracker_Response
-                message = tracker_response.decode("utf-8")
-                if "failure" in message:
-                    raise ConnectionError('Unable to connect to tracker: {}'.format(message))
+    async def close(self):
+        await self.httpClient.aclose()
 
-            # a successful tracker response will have non-uncicode data, so it's a safe to bet ignore this exception.
-            except UnicodeDecodeError:
-                pass
+    def raise_for_error(self, tracker_response):
+        """
+        A (hacky) fix to detect errors by tracker even when the response has a status code of 200  
+        """
+        try:
+            # a tracker response containing an error will have a utf-8 message only.
+            # see: https://wiki.theory.org/index.php/BitTorrentSpecification#Tracker_Response
+            message = tracker_response.decode("utf-8")
+            if "failure" in message:
+                raise ConnectionError('Unable to connect to tracker: {}'.format(message))
+
+        # a successful tracker response will have non-uncicode data, so it's a safe to bet ignore this exception.
+        except UnicodeDecodeError:
+            pass
 
 def CalculatePeerId():
     PeerId = '-PC0001-' + \

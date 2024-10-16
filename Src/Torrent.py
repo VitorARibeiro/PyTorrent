@@ -20,11 +20,10 @@ class Torrent:
 
 
     def GetSumFileLengths(self):
-        # Access the 'info' dictionary within the torrent file
         #Se for um Torrent Single file podemos aceder diretamente ao b'lenght'
         #Se for multi File temos uma lista de ficheiros e so depois os tamanhos de cada 1
         Info = self.MetaInfo[b'info']
-        total_length = 0 #Inicializacao da variavel
+        total_length = 0 
         #Single File Torrents
         if b'length' in Info:
             total_length = Info[b'length']
