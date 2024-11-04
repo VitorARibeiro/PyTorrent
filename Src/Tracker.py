@@ -1,17 +1,111 @@
 import bencodepy
 import httpx
+from struct import unpack
 import random
 import logging
 from urllib.parse import urlencode
+import socket
+
+def _CalculatePeerId():
+    """
+    Calculate and return a unique Peer ID.
+
+    The `peer id` is a 20 byte long identifier. This implementation use the
+    Azureus style `-PC1000-<random-characters>`.
+
+    Read more:
+        https://wiki.theory.org/BitTorrentSpecification#peer_id
+    """
+    return '-PC0001-' + ''.join(
+        [str(random.randint(0, 9)) for _ in range(12)])
+
+
+def _DecodePort(port):
+    """
+    Converts a 32-bit packed binary port number to int
+    converts from b'\x1A\x2B' to 6699
+    """
+    # Convert from C style big-endian encoded as unsigned short
+    return unpack(">H", port)[0]
 
 class TrackerResponse:
-    def __init__(self, response:dict):
-        self.response = response
-class Tracker:
+    
 
+    def __init__(self, response: dict):
+        self.response = response
+
+    @property
+    def failure(self):
+        """
+        If this response was a failed response, this is the error message to
+        why the tracker request failed.
+
+        If no error occurred this will be None
+        """
+        if b'failure reason' in self.response:
+            return self.response[b'failure reason'].decode('utf-8')
+        return None
+
+    @property
+    def interval(self) -> int:
+        """
+        Interval in seconds that the client should wait between sending
+        periodic requests to the tracker.
+        """
+        return self.response.get(b'interval', 0)
+
+    @property
+    def complete(self) -> int:
+        """
+        Number of peers with the entire file, i.e. seeders.
+        """
+        return self.response.get(b'complete', 0)
+
+    @property
+    def incomplete(self) -> int:
+        """
+        Number of non-seeder peers, aka "leechers".
+        """
+        return self.response.get(b'incomplete', 0)
+
+    @property
+    def peers(self):
+        """
+        A list of tuples for each peer structured as (ip, port)
+        """
+        # The BitTorrent specification specifies two types of responses. One
+        # where the peers field is a list of dictionaries and one where all
+        # the peers are encoded in a single string
+        peers = self.response[b'peers']
+        if type(peers) == list:
+            # TODO Implement support for dictionary peer list
+            print('Dictionary model peers are returned by tracker')
+            raise NotImplementedError()
+        else:
+            print('Binary model peers are returned by tracker')
+
+            # Split the string in pieces of length 6 bytes, where the first
+            # 4 characters is the IP the last 2 is the TCP port.
+            peers = [peers[i:i+6] for i in range(0, len(peers), 6)]
+
+            # Convert the encoded address to a list of tuples
+            return [(socket.inet_ntoa(p[:4]), _DecodePort(p[4:]))
+                    for p in peers]
+
+    def __str__(self):
+        return "incomplete: {incomplete}\n" \
+               "complete: {complete}\n" \
+               "interval: {interval}\n" \
+               "peers: {peers}\n".format(
+                   incomplete=self.incomplete,
+                   complete=self.complete,
+                   interval=self.interval,
+                   peers=self.peers)
+
+class Tracker:
     def __init__(self, Torrent):
         self.Torrent = Torrent
-        self.PeerId = CalculatePeerId()
+        self.PeerId = _CalculatePeerId()
         self.httpClient = httpx.AsyncClient()
 
     async def Connect(self,
@@ -48,7 +142,7 @@ class Tracker:
 
         data = response.content
         self.raise_for_error(data)
-        return bencodepy.decode(data)
+        return TrackerResponse(bencodepy.decode(data))
 
     async def close(self):
         await self.httpClient.aclose()
@@ -67,8 +161,3 @@ class Tracker:
         # a successful tracker response will have non-uncicode data, so it's a safe to bet ignore this exception.
         except UnicodeDecodeError:
             pass
-
-def CalculatePeerId():
-    PeerId = '-PC0001-' + \
-            ''.join([str(random.randint(0, 9)) for _ in range(12)])
-    return PeerId 
